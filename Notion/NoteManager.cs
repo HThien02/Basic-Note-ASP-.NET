@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection.Metadata;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -11,11 +12,67 @@ namespace Notion
     {
         private List<Note> notes;
         private int nextID;
+        private string filePath;
 
-        public NoteManager()
+        public NoteManager(string filePath)
         {
             notes = new List<Note>();
             nextID = 1;
+            this.filePath = filePath;
+
+            if(!File.Exists(filePath))
+            {
+                    SaveNotesToFile();
+            }
+
+            LoadNotesFromFile();
+        }
+
+        public void SaveNotesToFile()
+        {
+            using (StreamWriter writer = new StreamWriter(filePath)) {
+                foreach (var note in notes) {            
+                    writer.WriteLine($"ID : {note.ID}");
+                    writer.WriteLine($"Title : {note.Title}");
+                    writer.WriteLine($"Content : {note.Content}");
+                    writer.WriteLine($"Created Date : {note.Created}");
+                }
+            }
+        }
+
+        private void LoadNotesFromFile() { 
+            notes.Clear();
+
+            if (File.Exists(filePath))
+            {
+                using (StreamReader reader = new StreamReader(filePath))
+                {
+
+                    while (!reader.EndOfStream)
+                    {
+                        string title = ReadNoteProperty(reader.ReadLine());
+                        string content = ReadNoteProperty(reader.ReadLine());
+
+                        if (!string.IsNullOrWhiteSpace(title) && !string.IsNullOrWhiteSpace(content))
+                        {
+                            Note note = new Note { Title = title, Content = content };
+                            notes.Add(note);
+                        }
+                    }
+                }
+            }
+        }
+
+        private string ReadNoteProperty(string line)
+        {
+            if (!string.IsNullOrWhiteSpace(line)) {
+                string[] parts = line.Split(':');
+                if (parts.Length == 2)
+                {
+                    return parts[1].Trim();
+                }
+            }
+            return string.Empty;
         }
 
         public void AddOrUpdateNote(string title, string content)
@@ -34,6 +91,7 @@ namespace Notion
                     Created = DateTime.Now,
                 };
                 notes.Add(newNote);
+                SaveNotesToFile();
             }
         }
 

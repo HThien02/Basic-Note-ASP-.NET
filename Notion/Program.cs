@@ -2,10 +2,12 @@
 using Notion.Models;
 class Program
 {
-        private static NoteManager NoteManager = new NoteManager();
 
     public static void Main(string[] args)
     {
+        string filePath = "notes.txt";
+        NoteManager noteManager = new NoteManager(filePath);
+        
         while (true)
         {
             Console.WriteLine("1. Display all note");
@@ -19,64 +21,29 @@ class Program
             switch (choice)
             {
                 case "1":
-                    ShowAllNotes();
+                    noteManager.GetAllNotes().ForEach(note => Console.WriteLine(
+                        $"ID: {note.ID}\n | Title: {note.Title}\n | Content: {note.Content}\n | Created Date: {note.Created}\n"
+                        ));
                     break;
                 case "2":
-                    AddOrUpdate();
+                    Console.WriteLine("Enter note's title: ");
+                    string title = Console.ReadLine();
+                    Console.WriteLine("Enter note content: ");
+                    string content = Console.ReadLine();
+                    noteManager.AddOrUpdateNote(title, content);
+                    Console.WriteLine("Your note has been added or updated successfully!");
                     break;
                 case "3":
-                    DeleteNote();
+                    Console.Write("Enter Note Title to Delete: ");
+                    string titleToDelete = Console.ReadLine();
+                    noteManager.DeleteNoteByID(int.Parse(titleToDelete));
                     break;
                 case "4":
                     Environment.Exit(0);
                     break;
-            }
-        }
-
-        static void ShowAllNotes()
-        {
-            List<Note> notes = NoteManager.GetAllNotes();
-
-            if (notes.Count == 0)
-            {
-                Console.WriteLine("Don't have any note");
-            }
-            else
-            {
-                foreach(var note in notes)
-                {
-                    Console.WriteLine($"[{note.ID}] | [{note.Title}]: {note.Content} | {note.Created}");
-                }
-            }
-        }
-        
-        static void AddOrUpdate()
-        {
-            Console.Write("Input title of note: ");
-            string title = Console.ReadLine();
-            Console.WriteLine("Input content of note: ");
-            string content = Console.ReadLine();
-
-            NoteManager.AddOrUpdateNote(title, content);
-            Console.WriteLine("Your note has been updated");
-        }
-
-        static void DeleteNote()
-        {
-            Console.WriteLine("Input ID of note: ");
-            if (int.TryParse(Console.ReadLine(), out int id)) {
-                Note noteToDelete = NoteManager.GetNoteByID(id);
-                if (noteToDelete != null)
-                {
-                    NoteManager.DeleteNoteByID(id);
-                    Console.WriteLine($"Deleted note have ID is {id}");
-                } else
-                {
-                    Console.WriteLine($"Don't have any note ID is {id}");
-                } 
-            } else
-            {
-                Console.WriteLine("Your ID is not valid");
+                default:
+                    Console.WriteLine("Invalid option!"); 
+                    break;
             }
         }
 

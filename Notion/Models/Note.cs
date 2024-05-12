@@ -20,5 +20,9 @@ namespace Notion.Models
             Content = string.Empty;
             Created = DateTime.Now;
         }
+        public override string ToString()
+        {
+            return $"ID : {ID}\n Title: {Title}\nContent: {Content}\n Created Date: {Created}\n";
+        }
     }
 }
